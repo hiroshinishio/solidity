@@ -62,3 +62,44 @@ foreach (BOOST_COMPONENT IN LISTS BOOST_COMPONENTS)
 	get_property(LOCATION TARGET Boost::${BOOST_COMPONENT} PROPERTY IMPORTED_LOCATION)
 	message(STATUS "Found Boost::${BOOST_COMPONENT} at ${LOCATION}")
 endforeach()
+
+if(NOT USE_SYSTEM_LIBRARIES)
+	file(GLOB fmtlib_contents "${CMAKE_SOURCE_DIR}/deps/fmtlib/*")
+	file(GLOB nlohmannjson_contents "${CMAKE_SOURCE_DIR}/deps/nlohmann-json/*")
+	file(GLOB rangev3_contents "${CMAKE_SOURCE_DIR}/deps/range-v3/*")
+
+	if (fmtlib_contents AND nlohmannjson_contents AND rangev3_contents)
+		message(STATUS "git submodules seem to be already initialized: nothing to do.")
+	else()
+		message(STATUS "git submodules seem not to be initialized: implicitly executing 'git submodule update --init'.")
+		find_package(Git)
+		if (NOT Git_FOUND)
+			message(FATAL_ERROR "Failed to initialize submodules: 'git' command not found.")
+		endif()
+		execute_process(
+			COMMAND git submodule update --init
+			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+			RESULT_VARIABLE result
+		)
+		if(NOT result EQUAL 0)
+			message(FATAL_ERROR "Failed to initialize submodules: 'git submodule update --init' failed.")
+		endif()
+	endif()
+
+	if (NOT WIN32)
+		file(GLOB potential_submodules "${CMAKE_SOURCE_DIR}/deps/*")
+		set(expected_potential_submodule_count 3)
+		set(potential_submodule_count 0)
+		foreach(ITEM ${potential_submodules})
+			if(IS_DIRECTORY ${ITEM})
+				math(EXPR potential_submodule_count "${potential_submodule_count} + 1")
+			endif()
+		endforeach()
+		if (NOT ${potential_submodule_count} EQUAL ${expected_potential_submodule_count})
+			message(FATAL_ERROR
+				"There are more directories (potential submodules) found (${potential_submodule_count}) in '${CMAKE_SOURCE_DIR}/deps' than expected (${expected_potential_submodule_count}). "
+				"This is just a reminder to potentially update e.g. '${CMAKE_SOURCE_DIR}/cmake/EthDependencies.cmake'."
+			)
+		endif()
+	endif()
+endif()
