@@ -7,6 +7,7 @@ Language Features:
 
 
 Compiler Features:
+ * Code Generator: Transient storage state variables are now supported by the legacy pipeline.
  * Command Line Interface: Do not perform IR optimization when only unoptimized IR is requested.
  * Commandline Interface: Add ``--transient-storage-layout`` output.
  * Error Reporting: Unimplemented features are now properly reported as errors instead of being handled as if they were bugs.
