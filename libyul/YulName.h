@@ -38,6 +38,7 @@ namespace solidity::yul
 
 enum class LiteralKind;
 struct Dialect;
+struct EVMDialect;
 struct Block;
 struct BuiltinFunction;
 
@@ -69,55 +70,59 @@ public:
 	struct YulName
 	{
 		using ValueType = std::uint64_t;
-		ValueType value;
-		std::uint32_t yulNameRepositoryInstanceCount;
+		ValueType value{};
+		std::uint32_t repositoryInstanceId{};
 
 		bool operator==(YulName const& other) const
 		{
-			return yulNameRepositoryInstanceCount == other.yulNameRepositoryInstanceCount && value == other.value;
+			if (other.empty() && empty())
+				return true;
+			return repositoryInstanceId == other.repositoryInstanceId && value == other.value;
 		}
 		bool operator!=(YulName const& other) const
 		{
 			return !(*this == other);
 		}
-		bool operator<(YulName const& other) const
+		bool operator<(YulName const& _other) const
 		{
-			if (yulNameRepositoryInstanceCount < other.yulNameRepositoryInstanceCount)
+			if (_other.empty() && empty())
+				return false;
+			if (repositoryInstanceId < _other.repositoryInstanceId)
 				return true;
-			return value < other.value;
+			return value < _other.value;
 		}
 
 		[[nodiscard]] bool empty() const { return value == 0; }
 	};
 
-	/// Decorating a yul dialect builtin function with `YulName`s.
-	struct BuiltinFunction
+	/// Wrapping a yul dialect builtin function with `YulName`s.
+	struct BuiltinFunctionWrapper
 	{
 		YulName name;
 		std::vector<YulName> parameters;
 		std::vector<YulName> returns;
 
-		yul::BuiltinFunction const* data;
+		yul::BuiltinFunction const* definition;
 	};
 
 	/// A couple of predefined yul names, most of which are dialect builtins.
 	struct PredefinedHandles
 	{
-		YulName empty {}; ///< Special empty name (corresponding to the empty label).
-		YulName verbatim {}; ///< Verbatim builtin parent name. All verbatims are derived from this.
-		YulName boolType {}; ///< Bool type. Depending on dialect, this may be zero/empty.
-		YulName datasize {}; ///< Datasize builtin.
-		YulName dataoffset {}; ///< Dataoffset builtin.
-		YulName selfdestruct {}; ///< Selfdestruct builtin.
-		YulName memoryguard {}; ///< Memoryguard builtin.
-		YulName eq {}; ///< Equality function.
-		YulName add {}; ///< Addition function.
-		YulName sub {}; ///< Subtraction function.
-		YulName tstore {}; ///< Tstore builtin.
-		YulName defaultType {}; ///< Dialect's default type. May be zero/empty.
-		YulName placeholder_zero {}; ///< Special name `@ 0` used in the `UnusedStoreEliminator`.
-		YulName placeholder_one {}; ///< Special name `@ 1` used in the `UnusedStoreEliminator`.
-		YulName placeholder_thirtytwo {}; ///< Special name `@ 32` used in the `UnusedStoreEliminator`.
+		YulName empty{}; ///< Special empty name (corresponding to the empty label).
+		YulName verbatim{}; ///< Verbatim builtin parent name. All verbatims are derived from this.
+		YulName boolType{}; ///< Bool type. Depending on dialect, this may be zero/empty.
+		YulName datasize{}; ///< Datasize builtin.
+		YulName dataoffset{}; ///< Dataoffset builtin.
+		YulName selfdestruct{}; ///< Selfdestruct builtin.
+		YulName memoryguard{}; ///< Memoryguard builtin.
+		YulName eq{}; ///< Equality function.
+		YulName add{}; ///< Addition function.
+		YulName sub{}; ///< Subtraction function.
+		YulName tstore{}; ///< Tstore builtin.
+		YulName defaultType{}; ///< Dialect's default type. May be zero/empty.
+		YulName placeholderZero{}; ///< Special name `@ 0` used in the `UnusedStoreEliminator`.
+		YulName placeholderOne{}; ///< Special name `@ 1` used in the `UnusedStoreEliminator`.
+		YulName placeholderThirtyTwo{}; ///< Special name `@ 32` used in the `UnusedStoreEliminator`.
 	};
 
 	/// Construct via dialect. It is important that the dialect instance lives at least as long as the name repository
@@ -138,11 +143,15 @@ public:
 	YulName deriveName(YulName const& _baseName);
 
 	/// The empty name.
-	YulName const& emptyName() const;
+	static constexpr YulName const& emptyName()	{ return m_emptyName; }
 
 	/// Yields the label of a yul name. The name must have been added via `defineName`, a label must have been
 	/// generated with `generateLabels`, or it is a builtin.
 	std::optional<std::string_view> labelOf(YulName const& _name) const;
+
+	/// If it can be assumed that the label was already generated, this function will yield it (or fail with an
+	/// assertion error).
+	std::string_view requiredLabelOf(YulName const& _name) const;
 
 	/// Yields the name that the provided name was based on - or the name itself, if the name was directly "defined".
 	YulName const& baseNameOf(YulName const& _name) const;
@@ -160,17 +169,17 @@ public:
 	PredefinedHandles const& predefined() const { return m_predefined; }
 
 	/// Functionality that decorates a yul dialect based on YulNames (ids).
-	[[nodiscard]] BuiltinFunction const* builtin(YulName const& _name) const;
+	[[nodiscard]] BuiltinFunctionWrapper const* builtin(YulName const& _name) const;
 	bool isBuiltinName(YulName const& _name) const;
 
-	BuiltinFunction const* discardFunction(YulName const& _type) const;
-	BuiltinFunction const* equalityFunction(YulName const& _type) const;
-	BuiltinFunction const* booleanNegationFunction() const;
+	BuiltinFunctionWrapper const* discardFunction(YulName const& _type) const;
+	BuiltinFunctionWrapper const* equalityFunction(YulName const& _type) const;
+	BuiltinFunctionWrapper const* booleanNegationFunction() const;
 
-	BuiltinFunction const* memoryStoreFunction(YulName const& _type) const;
-	BuiltinFunction const* memoryLoadFunction(YulName const& _type) const;
-	BuiltinFunction const* storageStoreFunction(YulName const& _type) const;
-	BuiltinFunction const* storageLoadFunction(YulName const& _type) const;
+	BuiltinFunctionWrapper const* memoryStoreFunction(YulName const& _type) const;
+	BuiltinFunctionWrapper const* memoryLoadFunction(YulName const& _type) const;
+	BuiltinFunctionWrapper const* storageStoreFunction(YulName const& _type) const;
+	BuiltinFunctionWrapper const* storageLoadFunction(YulName const& _type) const;
 	YulName const& hashFunction(YulName const& _name) const;
 
 	/// Tries to find the label in the defined names and returns the corresponding name. If not found, `emptyName`.
@@ -186,7 +195,7 @@ public:
 	[[nodiscard]] bool isType(YulName const& _name) const;
 
 	/// Number of types. If the dialect is untyped, there is still one type (the "empty type" type)
-	size_t nTypes() const;
+	size_t typeCount() const;
 
 	/// The contained dialect.
 	Dialect const& dialect() const;
@@ -194,23 +203,27 @@ public:
 	/// Whether the contained dialect is an EVM dialect (see `EVMDialect`).
 	[[nodiscard]] bool isEvmDialect() const;
 
+	EVMDialect const* evmDialect() const;
+
+	std::uint32_t instanceId() const { return m_instanceCounter.value; }
+
 	/// Generates labels for derived names over the set of _usedNames, respecting a set of _illegal labels.
 	/// This will change the state of all derived names in _usedNames to "not derived" with a label associated to them.
 	void generateLabels(std::set<YulName> const& _usedNames, std::set<std::string> const& _illegal = {});
 
 private:
-	struct YulNameRepositoryInstanceCounter
+	struct InstanceCounter
 	{
-		YulNameRepositoryInstanceCounter(): value(++count) {}
-		~YulNameRepositoryInstanceCounter() = default;
-		YulNameRepositoryInstanceCounter(YulNameRepositoryInstanceCounter const&) { value = ++count; }
-		YulNameRepositoryInstanceCounter& operator=(YulNameRepositoryInstanceCounter const&)
+		InstanceCounter(): value(++count) {}
+		~InstanceCounter() = default;
+		InstanceCounter(InstanceCounter const&) { value = ++count; }
+		InstanceCounter& operator=(InstanceCounter const&)
 		{
 			value = ++count;
 			return *this;
 		}
-		YulNameRepositoryInstanceCounter(YulNameRepositoryInstanceCounter&& _other) = default;
-		YulNameRepositoryInstanceCounter& operator=(YulNameRepositoryInstanceCounter&&) = default;
+		InstanceCounter(InstanceCounter&& _other) = default;
+		InstanceCounter& operator=(InstanceCounter&&) = default;
 
 		static std::uint32_t count;
 		std::uint32_t value;
@@ -228,28 +241,30 @@ private:
 	};
 	struct IndexBoundaries
 	{
-		size_t beginTypes {};
-		size_t endTypes {};
-		size_t beginBuiltins {};
-		size_t endBuiltins {};
+		size_t beginTypes{};
+		size_t endTypes{};
+		size_t beginBuiltins{};
+		size_t endBuiltins{};
 	};
 	enum class YulNameState	{ DERIVED, DEFINED };
 	void assertCompatibility(YulName const& _name) const;
 
 	size_t indexOfType(YulName const& _type) const;
-	BuiltinFunction convertBuiltinFunction(YulName const& _name, yul::BuiltinFunction const& _builtin) const;
-	BuiltinFunction const* fetchTypedPredefinedFunction(YulName const& _type, std::vector<std::optional<YulName>> const& _functions) const;
+	BuiltinFunctionWrapper convertBuiltinFunction(YulName const& _name, yul::BuiltinFunction const& _builtin) const;
+	BuiltinFunctionWrapper const* fetchTypedPredefinedFunction(YulName const& _type, std::vector<std::optional<YulName>> const& _functions) const;
 
-	YulNameRepositoryInstanceCounter m_instanceCounter;
+	static constexpr auto m_emptyName = YulName{0, 0};
+	InstanceCounter m_instanceCounter;
 	std::reference_wrapper<Dialect const> m_dialect;
+	EVMDialect const* m_evmDialect;
 	std::vector<std::tuple<YulName, std::string>> m_dialectTypes;
-	std::map<YulName, BuiltinFunction> m_builtinFunctions;
+	std::map<YulName, BuiltinFunctionWrapper> m_builtinFunctions;
 
 	PredefinedBuiltinFunctions m_predefinedBuiltinFunctions;
 
-	std::vector<std::string> m_definedLabels {};
-	std::vector<std::tuple<YulName, YulNameState>> m_names {};
-	std::map<std::tuple<size_t, size_t>, YulName> m_verbatimNames {};
+	std::vector<std::string> m_definedLabels{};
+	std::vector<std::tuple<YulName, YulNameState>> m_names{};
+	std::map<std::tuple<size_t, size_t>, YulName> m_verbatimNames{};
 	PredefinedHandles m_predefined{};
 	IndexBoundaries m_indexBoundaries;
 };
