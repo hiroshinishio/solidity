@@ -352,6 +352,9 @@ public:
 	std::string readFromStorage(Type const& _type, size_t _offset, bool _splitFunctionTypes);
 	std::string readFromStorageDynamic(Type const& _type, bool _splitFunctionTypes);
 
+	std::string readFromTransientStorage(Type const& _type, size_t _offset, bool _splitFunctionTypes);
+	std::string readFromTransientStorageDynamic(Type const& _type, bool _splitFunctionTypes);
+
 	/// @returns a function that reads a value type from memory. Performs cleanup.
 	/// signature: (addr) -> value
 	std::string readFromMemory(Type const& _type);
@@ -374,6 +377,12 @@ public:
 	/// For reference types, offset is checked to be zero at runtime.
 	/// signature: (slot, [offset,] value)
 	std::string updateStorageValueFunction(
+		Type const& _fromType,
+		Type const& _toType,
+		std::optional<unsigned> const& _offset = std::optional<unsigned>()
+	);
+
+	std::string updateTransientStorageValueFunction(
 		Type const& _fromType,
 		Type const& _toType,
 		std::optional<unsigned> const& _offset = std::optional<unsigned>()
@@ -574,6 +583,8 @@ private:
 	/// single variable.
 	/// @param _offset if provided, read from static offset, otherwise offset is a parameter of the Yul function.
 	std::string readFromStorageValueType(Type const& _type, std::optional<size_t> _offset, bool _splitFunctionTypes);
+
+	std::string readFromTransientStorageValueType(Type const& _type, std::optional<size_t> _offset, bool _splitFunctionTypes);
 
 	/// @returns a function that reads a reference type from storage to memory (performing a deep copy).
 	std::string readFromStorageReferenceType(Type const& _type);
