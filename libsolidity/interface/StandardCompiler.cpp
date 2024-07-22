@@ -1321,9 +1321,17 @@ Json StandardCompiler::compileSolidity(StandardCompiler::InputsAndSettings _inpu
 	compilerStack.setModelCheckerSettings(_inputsAndSettings.modelCheckerSettings);
 
 	compilerStack.enableEvmBytecodeGeneration(isEvmBytecodeRequested(_inputsAndSettings.outputSelection));
-	compilerStack.requestIROutputs(irOutputSelection(_inputsAndSettings.outputSelection));
+	CompilerStack::IROutputSelection selectedIrOutput = irOutputSelection(_inputsAndSettings.outputSelection);
+	compilerStack.requestIROutputs(selectedIrOutput);
 
 	Json errors = std::move(_inputsAndSettings.errors);
+
+	if (
+		_inputsAndSettings.debugInfoSelection.has_value() &&
+		_inputsAndSettings.debugInfoSelection->ethdebug &&
+		(selectedIrOutput == CompilerStack::IROutputSelection::None && !_inputsAndSettings.viaIR)
+	)
+		errors.emplace_back(formatError(Error::Type::FatalError, "general", "'ethdebug' can only be selected in 'settings.debug.debugInfo' when at least one of the IR outputs is selected or 'viaIR' was set."));
 
 	bool const binariesRequested = isBinaryRequested(_inputsAndSettings.outputSelection);
 

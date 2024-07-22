@@ -1,0 +1,32 @@
+{
+    "contracts": {
+        "C": {
+            "C": {
+                "evm": {
+                    "bytecode": {
+                        "functionDebugData": {},
+                        "generatedSources": [],
+                        "linkReferences": {},
+                        "object": "<BYTECODE REMOVED>",
+                        "opcodes":"<OPCODES REMOVED>",
+                        "sourceMap":"<SOURCEMAP REMOVED>"
+                    }
+                }
+            }
+        }
+    },
+    "errors": [
+        {
+            "component": "general",
+            "formattedMessage": "'ethdebug' can only be selected in 'settings.debug.debugInfo' when at least one of the IR outputs is selected or 'viaIR' was set.",
+            "message": "'ethdebug' can only be selected in 'settings.debug.debugInfo' when at least one of the IR outputs is selected or 'viaIR' was set.",
+            "severity": "error",
+            "type": "FatalError"
+        }
+    ],
+    "sources": {
+        "C": {
+            "id": 0
+        }
+    }
+}

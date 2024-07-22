@@ -59,7 +59,7 @@ std::pair<std::shared_ptr<Block>, std::shared_ptr<yul::AsmAnalysisInfo>> yul::te
 		solidity::test::CommonOptions::get().optimize ?
 			solidity::frontend::OptimiserSettings::standard() :
 			solidity::frontend::OptimiserSettings::minimal(),
-		DebugInfoSelection::All()
+		DebugInfoSelection::ExceptExperimental()
 	);
 	if (!stack.parseAndAnalyze("", _source) || !stack.errors().empty())
 		BOOST_FAIL("Invalid source.");

@@ -1,0 +1,13 @@
+{
+	"language": "Solidity",
+	"sources": {
+		"C": {"urls": ["standard_debug_info_ethdebug_via_ir/in.sol"]}
+	},
+	"settings": {
+		"viaIR": true,
+		"debug": {"debugInfo": ["ethdebug"]},
+		"outputSelection": {
+			"*": {"*": ["evm.bytecode"]}
+		}
+	}
+}
