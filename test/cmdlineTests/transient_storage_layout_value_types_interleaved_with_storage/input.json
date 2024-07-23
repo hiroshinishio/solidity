@@ -6,7 +6,7 @@
 	"settings": {
 		"outputSelection": {
 			"fileA": {
-				"A": ["transientStorageLayout"]
+				"A": ["storageLayout", "transientStorageLayout"]
 			}
 		}
 	}

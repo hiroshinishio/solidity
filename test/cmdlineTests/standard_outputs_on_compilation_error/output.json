@@ -38,7 +38,7 @@
                     "types": null
                 },
                 "transientStorageLayout": {
-                    "transient-storage": [],
+                    "storage": [],
                     "types": null
                 },
                 "userdoc": {

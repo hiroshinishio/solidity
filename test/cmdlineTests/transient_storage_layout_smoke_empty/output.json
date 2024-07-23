@@ -3,7 +3,7 @@
         "fileA": {
             "A": {
                 "transientStorageLayout": {
-                    "transient-storage": [],
+                    "storage": [],
                     "types": null
                 }
             }

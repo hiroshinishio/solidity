@@ -1,79 +1,24 @@
 {
-    "contracts": {
-        "fileA": {
-            "A": {
-                "transientStorageLayout": {
-                    "transient-storage": [
-                        {
-                            "astId": 3,
-                            "contract": "fileA:A",
-                            "label": "x",
-                            "offset": 0,
-                            "slot": "0",
-                            "type": "t_uint64"
-                        },
-                        {
-                            "astId": 5,
-                            "contract": "fileA:A",
-                            "label": "y",
-                            "offset": 8,
-                            "slot": "0",
-                            "type": "t_uint128"
-                        },
-                        {
-                            "astId": 7,
-                            "contract": "fileA:A",
-                            "label": "z",
-                            "offset": 0,
-                            "slot": "1",
-                            "type": "t_uint128"
-                        },
-                        {
-                            "astId": 9,
-                            "contract": "fileA:A",
-                            "label": "addr",
-                            "offset": 0,
-                            "slot": "2",
-                            "type": "t_address"
-                        },
-                        {
-                            "astId": 11,
-                            "contract": "fileA:A",
-                            "label": "b",
-                            "offset": 20,
-                            "slot": "2",
-                            "type": "t_bool"
-                        }
-                    ],
-                    "types": {
-                        "t_address": {
-                            "encoding": "inplace",
-                            "label": "address",
-                            "numberOfBytes": "20"
-                        },
-                        "t_bool": {
-                            "encoding": "inplace",
-                            "label": "bool",
-                            "numberOfBytes": "1"
-                        },
-                        "t_uint128": {
-                            "encoding": "inplace",
-                            "label": "uint128",
-                            "numberOfBytes": "16"
-                        },
-                        "t_uint64": {
-                            "encoding": "inplace",
-                            "label": "uint64",
-                            "numberOfBytes": "8"
-                        }
-                    }
-                }
-            }
+    "errors": [
+        {
+            "component": "general",
+            "errorCode": "7858",
+            "formattedMessage": "ParserError: Expected pragma, import directive or contract/interface/library/struct/enum/constant/function/error definition.
+  --> fileA:25:1:
+   |
+25 | }
+   | ^
+
+",
+            "message": "Expected pragma, import directive or contract/interface/library/struct/enum/constant/function/error definition.",
+            "severity": "error",
+            "sourceLocation": {
+                "end": 402,
+                "file": "fileA",
+                "start": 401
+            },
+            "type": "ParserError"
         }
-    },
-    "sources": {
-        "fileA": {
-            "id": 0
-        }
-    }
+    ],
+    "sources": {}
 }

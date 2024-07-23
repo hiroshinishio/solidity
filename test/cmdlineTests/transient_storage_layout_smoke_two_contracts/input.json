@@ -5,14 +5,14 @@
 			"content": "//SPDX-License-Identifier: GPL-3.0\npragma solidity >=0.0;\ncontract A { }"
 		},
 		"fileB": {
-			"content": "//SPDX-License-Identifier: GPL-3.0\npragma solidity >=0.0;\ncontract A { uint transient x; uint transient y; }"
+			"content": "//SPDX-License-Identifier: GPL-3.0\npragma solidity >=0.0;\ncontract B { uint transient x; uint transient y; }"
 		}
 	},
 	"settings": {
 		"outputSelection": {
 			"fileA": {
-				"A": [ "transientStorageLayout" ],
-				"": [ "transientStorageLayout" ]
+				"A": ["transientStorageLayout"],
+				"B": ["transientStorageLayout"]
 			}
 		}
 	}

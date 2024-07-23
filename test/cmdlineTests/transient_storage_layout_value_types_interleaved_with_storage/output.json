@@ -1,71 +1,24 @@
 {
-    "contracts": {
-        "fileA": {
-            "A": {
-                "transientStorageLayout": {
-                    "transient-storage": [
-                        {
-                            "astId": 3,
-                            "contract": "fileA:A",
-                            "label": "x",
-                            "offset": 0,
-                            "slot": "0",
-                            "type": "t_uint256"
-                        },
-                        {
-                            "astId": 7,
-                            "contract": "fileA:A",
-                            "label": "z",
-                            "offset": 0,
-                            "slot": "1",
-                            "type": "t_int256"
-                        },
-                        {
-                            "astId": 11,
-                            "contract": "fileA:A",
-                            "label": "addr",
-                            "offset": 0,
-                            "slot": "2",
-                            "type": "t_address"
-                        },
-                        {
-                            "astId": 15,
-                            "contract": "fileA:A",
-                            "label": "b",
-                            "offset": 20,
-                            "slot": "2",
-                            "type": "t_bool"
-                        }
-                    ],
-                    "types": {
-                        "t_address": {
-                            "encoding": "inplace",
-                            "label": "address",
-                            "numberOfBytes": "20"
-                        },
-                        "t_bool": {
-                            "encoding": "inplace",
-                            "label": "bool",
-                            "numberOfBytes": "1"
-                        },
-                        "t_int256": {
-                            "encoding": "inplace",
-                            "label": "int256",
-                            "numberOfBytes": "32"
-                        },
-                        "t_uint256": {
-                            "encoding": "inplace",
-                            "label": "uint256",
-                            "numberOfBytes": "32"
-                        }
-                    }
-                }
-            }
+    "errors": [
+        {
+            "component": "general",
+            "errorCode": "2314",
+            "formattedMessage": "ParserError: Expected identifier but got 'external'
+ --> fileA:8:13:
+  |
+8 |     address external transient addr;
+  |             ^^^^^^^^
+
+",
+            "message": "Expected identifier but got 'external'",
+            "severity": "error",
+            "sourceLocation": {
+                "end": 188,
+                "file": "fileA",
+                "start": 180
+            },
+            "type": "ParserError"
         }
-    },
-    "sources": {
-        "fileA": {
-            "id": 0
-        }
-    }
+    ],
+    "sources": {}
 }

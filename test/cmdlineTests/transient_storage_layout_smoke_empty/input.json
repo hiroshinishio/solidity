@@ -8,8 +8,7 @@
 	"settings": {
 		"outputSelection": {
 			"fileA": {
-				"A": [ "transientStorageLayout" ],
-				"": [ "transientStorageLayout" ]
+				"A": ["transientStorageLayout"]
 			}
 		}
 	}

@@ -2140,21 +2140,26 @@ FunctionType const* ContractType::newExpressionType() const
 	return m_constructorType;
 }
 
-std::vector<std::tuple<VariableDeclaration const*, u256, unsigned>> ContractType::stateVariables(DataLocation _location) const
+std::vector<std::tuple<VariableDeclaration const*, u256, unsigned>> ContractType::stateVariables(std::optional<DataLocation> _location) const
 {
-	VariableDeclaration::Location location = [&]() {
-		switch (_location)
+	std::optional<VariableDeclaration::Location> location = [&]() -> std::optional<VariableDeclaration::Location> {
+		if (!_location.has_value())
+			return std::nullopt;
+		switch (_location.value())
 		{
-			case DataLocation::Storage: return VariableDeclaration::Location::Unspecified; // By default state variables have unspecified (storage) data location
-			case DataLocation::Transient: return VariableDeclaration::Location::Transient;
-			default: solAssert(false);
+		case DataLocation::Storage: return std::make_optional(VariableDeclaration::Location::Unspecified); // By default state variables have unspecified (storage) data location
+		case DataLocation::Transient: return std::make_optional(VariableDeclaration::Location::Transient);
+		default: solAssert(false);
 		}
 	}();
 
 	std::vector<VariableDeclaration const*> variables;
 	for (ContractDefinition const* contract: m_contract.annotation().linearizedBaseContracts | ranges::views::reverse)
 		for (VariableDeclaration const* variable: contract->stateVariables())
-			if (!(variable->isConstant() || variable->immutable()) && variable->referenceLocation() == location)
+			if (
+				!(variable->isConstant() || variable->immutable()) &&
+				variable->referenceLocation() == location.value_or(variable->referenceLocation())
+			)
 				variables.push_back(variable);
 	TypePointers types;
 	for (auto variable: variables)

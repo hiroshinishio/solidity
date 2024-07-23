@@ -35,20 +35,12 @@ Json StorageLayout::generate(ContractDefinition const& _contractDef, DataLocatio
 	auto contractType = dynamic_cast<ContractType const*>(typeType->actualType());
 	solAssert(contractType, "");
 
-	std::string locationKey = [&]() {
-		switch (_location)
-		{
-			case DataLocation::Storage: return "storage"s;
-			case DataLocation::Transient: return "transient-storage"s;
-			default: solAssert(false);
-		}
-	}();
 	Json variables = Json::array();
 	for (auto [var, slot, offset]: contractType->stateVariables(_location))
 		variables.emplace_back(generate(*var, slot, offset));
 
 	Json layout;
-	layout[locationKey] = std::move(variables);
+	layout["storage"] = std::move(variables);
 	layout["types"] = std::move(m_types);
 
 	return layout;
