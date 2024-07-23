@@ -2746,21 +2746,33 @@ std::string YulUtilFunctions::mappingIndexAccessFunction(MappingType const& _map
 	});
 }
 
-std::string YulUtilFunctions::readFromStorage(Type const& _type, size_t _offset, bool _splitFunctionTypes)
+std::string YulUtilFunctions::readFromStorage(
+	Type const& _type,
+	size_t _offset,
+	bool _splitFunctionTypes,
+	VariableDeclaration::Location _location
+)
 {
 	if (_type.isValueType())
-		return readFromStorageValueType(_type, _offset, _splitFunctionTypes);
+		return readFromStorageValueType(_type, _offset, _splitFunctionTypes, _location);
 	else
 	{
+		solAssert(_location != VariableDeclaration::Location::Transient);
 		solAssert(_offset == 0, "");
 		return readFromStorageReferenceType(_type);
 	}
 }
 
-std::string YulUtilFunctions::readFromStorageDynamic(Type const& _type, bool _splitFunctionTypes)
+std::string YulUtilFunctions::readFromStorageDynamic(
+	Type const& _type,
+	bool _splitFunctionTypes,
+	VariableDeclaration::Location _location
+)
 {
 	if (_type.isValueType())
-		return readFromStorageValueType(_type, {}, _splitFunctionTypes);
+		return readFromStorageValueType(_type, {}, _splitFunctionTypes, _location);
+
+	solAssert(_location != VariableDeclaration::Location::Transient);
 	std::string functionName =
 		"read_from_storage__dynamic_" +
 		std::string(_splitFunctionTypes ? "split_" : "") +
@@ -2780,74 +2792,31 @@ std::string YulUtilFunctions::readFromStorageDynamic(Type const& _type, bool _sp
 	});
 }
 
-std::string YulUtilFunctions::readFromTransientStorage(Type const& _type, size_t _offset, bool _splitFunctionTypes)
-{
-	solAssert(_type.isValueType());
-	return readFromTransientStorageValueType(_type, _offset, _splitFunctionTypes);
-}
-
-std::string YulUtilFunctions::readFromTransientStorageDynamic(Type const& _type, bool _splitFunctionTypes)
-{
-	solAssert(_type.isValueType());
-	return readFromTransientStorageValueType(_type, {}, _splitFunctionTypes);
-}
-
-std::string YulUtilFunctions::readFromStorageValueType(Type const& _type, std::optional<size_t> _offset, bool _splitFunctionTypes)
+std::string YulUtilFunctions::readFromStorageValueType(
+	Type const& _type,
+	std::optional<size_t> _offset,
+	bool _splitFunctionTypes,
+	VariableDeclaration::Location _location
+)
 {
 	solAssert(_type.isValueType(), "");
 
 	std::string functionName =
-			"read_from_storage_" +
-			std::string(_splitFunctionTypes ? "split_" : "") + (
-				_offset.has_value() ?
-				"offset_" + std::to_string(*_offset) :
-				"dynamic"
-			) +
-			"_" +
-			_type.identifier();
-
-	return m_functionCollector.createFunction(functionName, [&] {
-		Whiskers templ(R"(
-			function <functionName>(slot<?dynamic>, offset</dynamic>) -> <?split>addr, selector<!split>value</split> {
-				<?split>let</split> value := <extract>(sload(slot)<?dynamic>, offset</dynamic>)
-				<?split>
-					addr, selector := <splitFunction>(value)
-				</split>
-			}
-		)");
-		templ("functionName", functionName);
-		templ("dynamic", !_offset.has_value());
-		if (_offset.has_value())
-			templ("extract", extractFromStorageValue(_type, *_offset));
-		else
-			templ("extract", extractFromStorageValueDynamic(_type));
-		auto const* funType = dynamic_cast<FunctionType const*>(&_type);
-		bool split = _splitFunctionTypes && funType && funType->kind() == FunctionType::Kind::External;
-		templ("split", split);
-		if (split)
-			templ("splitFunction", splitExternalFunctionIdFunction());
-		return templ.render();
-	});
-}
-
-std::string YulUtilFunctions::readFromTransientStorageValueType(Type const& _type, std::optional<size_t> _offset, bool _splitFunctionTypes)
-{
-	solAssert(_type.isValueType(), "");
-
-	std::string functionName =
-		"read_from_transient_storage_" +
+		"read_from_" +
+		(_location == VariableDeclaration::Location::Transient ? "transient_"s : "") +
+		"storage_" +
 		std::string(_splitFunctionTypes ? "split_" : "") + (
 			_offset.has_value() ?
-				"offset_" + std::to_string(*_offset) :
-				"dynamic"
-			) +
+			"offset_" + std::to_string(*_offset) :
+			"dynamic"
+		) +
 		"_" +
 		_type.identifier();
 
 	return m_functionCollector.createFunction(functionName, [&] {
 		Whiskers templ(R"(
 			function <functionName>(slot<?dynamic>, offset</dynamic>) -> <?split>addr, selector<!split>value</split> {
-				<?split>let</split> value := <extract>(tload(slot)<?dynamic>, offset</dynamic>)
+				<?split>let</split> value := <extract>(<loadOpcode>(slot)<?dynamic>, offset</dynamic>)
 				<?split>
 					addr, selector := <splitFunction>(value)
 				</split>
@@ -2855,6 +2824,7 @@ std::string YulUtilFunctions::readFromTransientStorageValueType(Type const& _typ
 		)");
 		templ("functionName", functionName);
 		templ("dynamic", !_offset.has_value());
+		templ("loadOpcode", _location == VariableDeclaration::Location::Transient ? "tload" : "sload");
 		if (_offset.has_value())
 			templ("extract", extractFromStorageValue(_type, *_offset));
 		else
@@ -2934,11 +2904,14 @@ std::string YulUtilFunctions::readFromCalldata(Type const& _type)
 std::string YulUtilFunctions::updateStorageValueFunction(
 	Type const& _fromType,
 	Type const& _toType,
-	std::optional<unsigned> const& _offset
+	std::optional<unsigned> const& _offset,
+	VariableDeclaration::Location _location
 )
 {
 	std::string const functionName =
-		"update_storage_value_" +
+		"update_" +
+		(_location == VariableDeclaration::Location::Transient ? "transient_"s : "") +
+		"storage_value_" +
 		(_offset.has_value() ? ("offset_" + std::to_string(*_offset)) : "") +
 		_fromType.identifier() +
 		"_to_" +
@@ -2954,7 +2927,7 @@ std::string YulUtilFunctions::updateStorageValueFunction(
 			return Whiskers(R"(
 				function <functionName>(slot, <offset><fromValues>) {
 					let <toValues> := <convert>(<fromValues>)
-					sstore(slot, <update>(sload(slot), <offset><prepare>(<toValues>)))
+					<storeOpcode>(slot, <update>(<loadOpcode>(slot), <offset><prepare>(<toValues>)))
 				}
 
 			)")
@@ -2968,10 +2941,13 @@ std::string YulUtilFunctions::updateStorageValueFunction(
 			("convert", conversionFunction(_fromType, _toType))
 			("fromValues", suffixedVariableNameList("value_", 0, _fromType.sizeOnStack()))
 			("toValues", suffixedVariableNameList("convertedValue_", 0, _toType.sizeOnStack()))
+			("storeOpcode", _location == VariableDeclaration::Location::Transient ? "tstore" : "sstore")
+			("loadOpcode", _location == VariableDeclaration::Location::Transient ? "tload" : "sload")
 			("prepare", prepareStoreFunction(_toType))
 			.render();
 		}
 
+		solAssert(_location != VariableDeclaration::Location::Transient);
 		auto const* toReferenceType = dynamic_cast<ReferenceType const*>(&_toType);
 		auto const* fromReferenceType = dynamic_cast<ReferenceType const*>(&_fromType);
 		solAssert(toReferenceType, "");
@@ -3040,47 +3016,6 @@ std::string YulUtilFunctions::updateStorageValueFunction(
 			));
 
 		return templ.render();
-	});
-}
-
-std::string YulUtilFunctions::updateTransientStorageValueFunction(
-	Type const& _fromType,
-	Type const& _toType,
-	std::optional<unsigned> const& _offset
-)
-{
-	solAssert(_toType.isValueType());
-	std::string const functionName =
-		"update_transient_storage_value_" +
-		(_offset.has_value() ? ("offset_" + std::to_string(*_offset)) : "") +
-		_fromType.identifier() +
-		"_to_" +
-		_toType.identifier();
-
-	return m_functionCollector.createFunction(functionName, [&] {
-		solAssert(_fromType.isImplicitlyConvertibleTo(_toType), "");
-		solAssert(_toType.storageBytes() <= 32, "Invalid storage bytes size.");
-		solAssert(_toType.storageBytes() > 0, "Invalid storage bytes size.");
-
-		return Whiskers(R"(
-			function <functionName>(slot, <offset><fromValues>) {
-				let <toValues> := <convert>(<fromValues>)
-				tstore(slot, <update>(tload(slot), <offset><prepare>(<toValues>)))
-			}
-
-		)")
-		("functionName", functionName)
-		("update",
-			_offset.has_value() ?
-			updateByteSliceFunction(_toType.storageBytes(), *_offset) :
-			updateByteSliceFunctionDynamic(_toType.storageBytes())
-		)
-		("offset", _offset.has_value() ? "" : "offset, ")
-		("convert", conversionFunction(_fromType, _toType))
-		("fromValues", suffixedVariableNameList("value_", 0, _fromType.sizeOnStack()))
-		("toValues", suffixedVariableNameList("convertedValue_", 0, _toType.sizeOnStack()))
-		("prepare", prepareStoreFunction(_toType))
-		.render();
 	});
 }
 
