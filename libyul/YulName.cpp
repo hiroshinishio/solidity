@@ -356,7 +356,7 @@ bool YulNameRepository::isType(YulName const& _name) const {
 bool YulNameRepository::isDerivedName(YulName const& _name) const
 {
 	assertCompatibility(_name);
-	yulAssert(_name	 <= std::numeric_limits<size_t>::max());
+	yulAssert(_name <= std::numeric_limits<size_t>::max());
 	return std::get<1>(m_names[static_cast<size_t>(_name)]) == YulNameState::DERIVED;
 }
 

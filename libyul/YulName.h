@@ -69,7 +69,7 @@ class YulNameRepository
 public:
 	using YulName = std::uint64_t;
 
-	/// Wrapping a yul dialect builtin function with `YulName`s.
+	/// Wrapping a yul dialect builtin function with `YulName` instances.
 	struct BuiltinFunctionWrapper
 	{
 		YulName name;
