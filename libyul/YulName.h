@@ -67,33 +67,7 @@ struct BuiltinFunction;
 class YulNameRepository
 {
 public:
-	struct YulName
-	{
-		using ValueType = std::uint64_t;
-		ValueType value{};
-		std::uint32_t repositoryInstanceId{};
-
-		bool operator==(YulName const& other) const
-		{
-			if (other.empty() && empty())
-				return true;
-			return repositoryInstanceId == other.repositoryInstanceId && value == other.value;
-		}
-		bool operator!=(YulName const& other) const
-		{
-			return !(*this == other);
-		}
-		bool operator<(YulName const& _other) const
-		{
-			if (_other.empty() && empty())
-				return false;
-			if (repositoryInstanceId < _other.repositoryInstanceId)
-				return true;
-			return value < _other.value;
-		}
-
-		[[nodiscard]] bool empty() const { return value == 0; }
-	};
+	using YulName = std::uint64_t;
 
 	/// Wrapping a yul dialect builtin function with `YulName`s.
 	struct BuiltinFunctionWrapper
@@ -147,14 +121,14 @@ public:
 
 	/// Yields the label of a yul name. The name must have been added via `defineName`, a label must have been
 	/// generated with `generateLabels`, or it is a builtin.
-	std::optional<std::string_view> labelOf(YulName const& _name) const;
+	std::optional<std::string_view> labelOf(YulName _name) const;
 
 	/// If it can be assumed that the label was already generated, this function will yield it (or fail with an
 	/// assertion error).
 	std::string_view requiredLabelOf(YulName const& _name) const;
 
 	/// Yields the name that the provided name was based on - or the name itself, if the name was directly "defined".
-	YulName const& baseNameOf(YulName const& _name) const;
+	YulName baseNameOf(YulName _name) const;
 
 	/// Yields the label of the base name of the provided name. Opposed to `labelOf`, this must always exist.
 	std::string_view baseLabelOf(YulName const& _name) const;
@@ -205,29 +179,11 @@ public:
 
 	EVMDialect const* evmDialect() const;
 
-	std::uint32_t instanceId() const { return m_instanceCounter.value; }
-
 	/// Generates labels for derived names over the set of _usedNames, respecting a set of _illegal labels.
 	/// This will change the state of all derived names in _usedNames to "not derived" with a label associated to them.
 	void generateLabels(std::set<YulName> const& _usedNames, std::set<std::string> const& _illegal = {});
 
 private:
-	struct InstanceCounter
-	{
-		InstanceCounter(): value(++count) {}
-		~InstanceCounter() = default;
-		InstanceCounter(InstanceCounter const&) { value = ++count; }
-		InstanceCounter& operator=(InstanceCounter const&)
-		{
-			value = ++count;
-			return *this;
-		}
-		InstanceCounter(InstanceCounter&& _other) = default;
-		InstanceCounter& operator=(InstanceCounter&&) = default;
-
-		static std::uint32_t count;
-		std::uint32_t value;
-	};
 	struct PredefinedBuiltinFunctions
 	{
 		std::vector<std::optional<YulName>> discardFunctions;
@@ -253,8 +209,7 @@ private:
 	BuiltinFunctionWrapper convertBuiltinFunction(YulName const& _name, yul::BuiltinFunction const& _builtin) const;
 	BuiltinFunctionWrapper const* fetchTypedPredefinedFunction(YulName const& _type, std::vector<std::optional<YulName>> const& _functions) const;
 
-	static constexpr auto m_emptyName = YulName{0, 0};
-	InstanceCounter m_instanceCounter;
+	static constexpr auto m_emptyName = YulName{0};
 	std::reference_wrapper<Dialect const> m_dialect;
 	EVMDialect const* m_evmDialect;
 	std::vector<std::tuple<YulName, std::string>> m_dialectTypes;

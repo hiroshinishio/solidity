@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(verbatim_functions)
 	auto const& dialect = EVMDialect::strictAssemblyForEVMObjects({});
 	YulNameRepository nameRepository(dialect);
 	auto const verbatimName = nameRepository.defineName("verbatim_5i_3o");
-	BOOST_CHECK(!verbatimName.empty());
+	BOOST_CHECK(verbatimName != YulNameRepository::emptyName());
 	BOOST_CHECK(nameRepository.isBuiltinName(verbatimName));
 	BOOST_CHECK(nameRepository.isDerivedName(verbatimName));
 	BOOST_CHECK(nameRepository.baseNameOf(verbatimName) == nameRepository.predefined().verbatim);
