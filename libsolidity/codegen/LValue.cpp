@@ -210,26 +210,15 @@ TransientStorageItem::TransientStorageItem(CompilerContext& _compilerContext, Va
 TransientStorageItem::TransientStorageItem(CompilerContext& _compilerContext, Type const& _type):
 	LValue(_compilerContext, &_type)
 {
-	if (m_dataType->isValueType())
-	{
-		if (m_dataType->category() != Type::Category::Function)
-			solAssert(m_dataType->storageSize() == m_dataType->sizeOnStack(), "");
-		solAssert(m_dataType->storageSize() == 1, "Invalid transient storage size.");
-	}
+	solUnimplementedAssert(m_dataType->isValueType(), "Transient storage is only supported for value types.");
+	if (m_dataType->category() != Type::Category::Function)
+		solAssert(m_dataType->storageSize() == m_dataType->sizeOnStack(), "");
+	solAssert(m_dataType->storageSize() == 1, "Invalid transient storage size.");
 }
 
 void TransientStorageItem::retrieveValue(SourceLocation const&, bool _remove) const
 {
-	// stack: storage_key storage_offset
-	if (!m_dataType->isValueType())
-	{
-		solAssert(m_dataType->sizeOnStack() == 1, "Invalid transient storage ref size.");
-		if (_remove)
-			m_context << Instruction::POP; // remove byte offset
-		else
-			m_context << Instruction::DUP2;
-		return;
-	}
+	solUnimplementedAssert(m_dataType->isValueType(), "Transient storage is only supported for value types.");
 	if (!_remove)
 		CompilerUtils(m_context).copyToStackTop(sizeOnStack(), sizeOnStack());
 	if (m_dataType->storageBytes() == 32)
