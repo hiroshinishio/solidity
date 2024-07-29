@@ -99,7 +99,7 @@ std::string YulInterpreterTest::interpret()
 		Interpreter::run(
 			state,
 			EVMDialect::strictAssemblyForEVMObjects(solidity::test::CommonOptions::get().evmVersion()),
-			m_ast->block(),
+			m_ast->root(),
 			/*disableExternalCalls=*/ !m_simulateExternalCallsToSelf,
 			/*disableMemoryTracing=*/ false
 		);

@@ -90,10 +90,10 @@ void interpret(std::string const& _source, bool _inspect, bool _disableExternalC
 		Dialect const& dialect(EVMDialect::strictAssemblyForEVMObjects(langutil::EVMVersion{}));
 
 		if (_inspect)
-			InspectedInterpreter::run(std::make_shared<Inspector>(_source, state), state, dialect, ast->block(), _disableExternalCalls, /*disableMemoryTracing=*/false);
+			InspectedInterpreter::run(std::make_shared<Inspector>(_source, state), state, dialect, ast->root(), _disableExternalCalls, /*disableMemoryTracing=*/false);
 
 		else
-			Interpreter::run(state, dialect, ast->block(), _disableExternalCalls, /*disableMemoryTracing=*/false);
+			Interpreter::run(state, dialect, ast->root(), _disableExternalCalls, /*disableMemoryTracing=*/false);
 	}
 	catch (InterpreterTerminatedGeneric const&)
 	{

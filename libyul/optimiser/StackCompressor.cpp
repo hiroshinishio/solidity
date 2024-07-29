@@ -244,7 +244,7 @@ bool StackCompressor::run(
 )
 {
 	yulAssert(_object.code);
-	auto block = std::get<Block>(ASTCopier{}(_object.code->block()));
+	auto block = std::get<Block>(ASTCopier{}(_object.code->root()));
 	auto result = run(_dialect, block, _object, _optimizeStackAllocation, _maxIterations);
 	_object.code = std::make_shared<AST>(std::move(block));
 	return result;

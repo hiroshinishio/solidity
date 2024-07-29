@@ -97,7 +97,7 @@ public:
 				printErrors(_charStream, errors);
 				throw std::runtime_error("Could not parse source.");
 			}
-			m_block = std::make_shared<yul::Block>(std::get<yul::Block>(ASTCopier{}(ast->block())));
+			m_block = std::make_shared<yul::Block>(std::get<yul::Block>(ASTCopier{}(ast->root())));
 			m_analysisInfo = std::make_unique<yul::AsmAnalysisInfo>();
 			AsmAnalyzer analyzer(
 				*m_analysisInfo,

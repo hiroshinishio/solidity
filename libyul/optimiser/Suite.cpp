@@ -157,7 +157,7 @@ void OptimiserSuite::run(
 		_dialect,
 		*_object.analysisInfo,
 		reservedIdentifiers
-	)(_object.code->block()));
+	)(_object.code->root()));
 
 	NameDispenser dispenser{_dialect, ast, reservedIdentifiers};
 	OptimiserStepContext context{_dialect, dispenser, reservedIdentifiers, _expectedExecutionsPerDeployment};

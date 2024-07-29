@@ -41,7 +41,7 @@ CompilabilityChecker::CompilabilityChecker(
 	if (auto const* evmDialect = dynamic_cast<EVMDialect const*>(&_dialect))
 	{
 		if (!_block)
-			_block = &_object.code->block();
+			_block = &_object.code->root();
 		NoOutputEVMDialect noOutputDialect(*evmDialect);
 
 		yul::AsmAnalysisInfo analysisInfo = yul::AsmAnalyzer::analyzeStrictAssertCorrect(

@@ -75,8 +75,8 @@ public:
 	static std::variant<Program, langutil::ErrorList> load(langutil::CharStream& _sourceCode);
 	void optimise(std::vector<std::string> const& _optimisationSteps);
 
-	size_t codeSize(yul::CodeWeights const& _weights) const { return computeCodeSize(m_ast->block(), _weights); }
-	yul::Block const& ast() const { return m_ast->block(); }
+	size_t codeSize(yul::CodeWeights const& _weights) const { return computeCodeSize(m_ast->root(), _weights); }
+	yul::Block const& ast() const { return m_ast->root(); }
 
 	friend std::ostream& operator<<(std::ostream& _stream, Program const& _program);
 	std::string toJson() const;
@@ -88,7 +88,7 @@ private:
 	):
 		m_ast(std::move(_ast)),
 		m_dialect{_dialect},
-		m_nameDispenser(_dialect, m_ast->block(), {})
+		m_nameDispenser(_dialect, m_ast->root(), {})
 	{}
 
 	static std::variant<std::unique_ptr<yul::AST>, langutil::ErrorList> parseObject(

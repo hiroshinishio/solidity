@@ -1477,7 +1477,7 @@ ASTPointer<InlineAssembly> Parser::parseInlineAssembly(ASTPointer<ASTString> con
 	if (ast == nullptr)
 		BOOST_THROW_EXCEPTION(FatalError());
 
-	location.end = nativeLocationOf(ast->block()).end;
+	location.end = nativeLocationOf(ast->root()).end;
 	return std::make_shared<InlineAssembly>(nextID(), location, _docString, dialect, std::move(flags), ast);
 }
 

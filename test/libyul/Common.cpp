@@ -83,7 +83,7 @@ std::pair<std::shared_ptr<Object>, std::shared_ptr<yul::AsmAnalysisInfo>> yul::t
 	std::shared_ptr<AsmAnalysisInfo> analysisInfo = std::make_shared<AsmAnalysisInfo>();
 	AsmAnalyzer analyzer(*analysisInfo, errorReporter, _dialect, {}, parserResult->qualifiedDataNames());
 	// TODO this should be done recursively.
-	if (!analyzer.analyze(parserResult->code->block()) || errorReporter.hasErrors())
+	if (!analyzer.analyze(parserResult->code->root()) || errorReporter.hasErrors())
 		return {};
 	return {std::move(parserResult), std::move(analysisInfo)};
 }
@@ -91,14 +91,14 @@ std::pair<std::shared_ptr<Object>, std::shared_ptr<yul::AsmAnalysisInfo>> yul::t
 yul::Block yul::test::disambiguate(std::string const& _source, bool _yul)
 {
 	auto result = parse(_source, _yul);
-	return std::get<Block>(Disambiguator(defaultDialect(_yul), *result.second, {})(result.first->block()));
+	return std::get<Block>(Disambiguator(defaultDialect(_yul), *result.second, {})(result.first->root()));
 }
 
 std::string yul::test::format(std::string const& _source, bool _yul)
 {
 	auto const version = solidity::test::CommonOptions::get().evmVersion();
 	Dialect const& dialect = _yul ? EVMDialectTyped::instance(version) : EVMDialect::strictAssemblyForEVMObjects(version);
-	return yul::AsmPrinter(yul::AsmPrinter::TypePrinting::Full, dialect)(parse(_source, _yul).first->block());
+	return yul::AsmPrinter(yul::AsmPrinter::TypePrinting::Full, dialect)(parse(_source, _yul).first->root());
 }
 
 namespace

@@ -89,7 +89,7 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* _data, size_t _size)
 	// that would be removed by the redundant store eliminator.
 	yulFuzzerUtil::TerminationReason termReason = yulFuzzerUtil::interpret(
 		os1,
-		stack.parserResult()->code->block(),
+		stack.parserResult()->code->root(),
 		EVMDialect::strictAssemblyForEVMObjects(langutil::EVMVersion()),
 		/*disableMemoryTracing=*/true
 	);
@@ -99,7 +99,7 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* _data, size_t _size)
 	stack.optimize();
 	termReason = yulFuzzerUtil::interpret(
 		os2,
-		stack.parserResult()->code->block(),
+		stack.parserResult()->code->root(),
 		EVMDialect::strictAssemblyForEVMObjects(langutil::EVMVersion()),
 		/*disableMemoryTracing=*/true
 	);

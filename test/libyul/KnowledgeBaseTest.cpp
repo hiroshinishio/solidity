@@ -49,7 +49,7 @@ protected:
 		std::tie(m_object, analysisInfo) = yul::test::parse(_source, m_dialect, errorList);
 		BOOST_REQUIRE(m_object && errorList.empty() && m_object->code);
 
-		auto block = std::get<Block>(yul::ASTCopier{}(m_object->code->block()));
+		auto block = std::get<Block>(yul::ASTCopier{}(m_object->code->root()));
 		NameDispenser dispenser(m_dialect, block);
 		std::set<YulName> reserved;
 		OptimiserStepContext context{m_dialect, dispenser, reserved, 0};

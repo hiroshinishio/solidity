@@ -313,7 +313,7 @@ bool SMTEncoder::visit(InlineAssembly const& _inlineAsm)
 	{
 		AssignedExternalsCollector(InlineAssembly const& _inlineAsm): externalReferences(_inlineAsm.annotation().externalReferences)
 		{
-			this->operator()(_inlineAsm.operations().block());
+			this->operator()(_inlineAsm.operations().root());
 		}
 
 		std::map<yul::Identifier const*, InlineAssemblyAnnotation::ExternalIdentifierInfo> const& externalReferences;
@@ -330,7 +330,7 @@ bool SMTEncoder::visit(InlineAssembly const& _inlineAsm)
 		}
 	};
 
-	yul::SideEffectsCollector sideEffectsCollector(_inlineAsm.dialect(), _inlineAsm.operations().block());
+	yul::SideEffectsCollector sideEffectsCollector(_inlineAsm.dialect(), _inlineAsm.operations().root());
 	if (sideEffectsCollector.invalidatesMemory())
 		resetMemoryVariables();
 	if (sideEffectsCollector.invalidatesStorage())

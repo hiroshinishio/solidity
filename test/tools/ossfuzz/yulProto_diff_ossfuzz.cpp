@@ -89,7 +89,7 @@ DEFINE_PROTO_FUZZER(Program const& _input)
 	// that would be removed by the redundant store eliminator.
 	yulFuzzerUtil::TerminationReason termReason = yulFuzzerUtil::interpret(
 		os1,
-		stack.parserResult()->code->block(),
+		stack.parserResult()->code->root(),
 		EVMDialect::strictAssemblyForEVMObjects(version),
 		/*disableMemoryTracing=*/true
 	);

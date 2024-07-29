@@ -105,11 +105,11 @@ struct Leave { langutil::DebugData::ConstPtr debugData; };
 class AST
 {
 public:
-	explicit AST(Block _block): m_block(std::move(_block)) {}
+	explicit AST(Block _root): m_root(std::move(_root)) {}
 
-	Block const& block() const { return m_block; }
+	Block const& root() const { return m_root; }
 private:
-	Block m_block;
+	Block m_root;
 };
 
 

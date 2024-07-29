@@ -98,14 +98,14 @@ YulOptimizerTestCommon::YulOptimizerTestCommon(
 			return block;
 		}},
 		{"constantOptimiser", [&]() {
-			auto block = std::get<Block>(ASTCopier{}(m_object->code->block()));
+			auto block = std::get<Block>(ASTCopier{}(m_object->code->root()));
 			updateContext(block);
 			GasMeter meter(dynamic_cast<EVMDialect const&>(*m_dialect), false, 200);
 			ConstantOptimiser{dynamic_cast<EVMDialect const&>(*m_dialect), meter}(block);
 			return block;
 		}},
 		{"varDeclInitializer", [&]() {
-			auto block = std::get<Block>(ASTCopier{}(m_object->code->block()));
+			auto block = std::get<Block>(ASTCopier{}(m_object->code->root()));
 			updateContext(block);
 			VarDeclInitializer::run(*m_context, block);
 			return block;
@@ -151,7 +151,7 @@ YulOptimizerTestCommon::YulOptimizerTestCommon(
 			return block;
 		}},
 		{"expressionSplitter", [&]() {
-			auto block = std::get<Block>(ASTCopier{}(m_object->code->block()));
+			auto block = std::get<Block>(ASTCopier{}(m_object->code->root()));
 			updateContext(block);
 			ExpressionSplitter::run(*m_context, block);
 			return block;
@@ -415,7 +415,7 @@ YulOptimizerTestCommon::YulOptimizerTestCommon(
 				frontend::OptimiserSettings::DefaultYulOptimiserCleanupSteps,
 				frontend::OptimiserSettings::standard().expectedExecutionsPerDeployment
 			);
-			return std::get<Block>(ASTCopier{}(m_resultObject->code->block()));
+			return std::get<Block>(ASTCopier{}(m_resultObject->code->root()));
 		}},
 		{"stackLimitEvader", [&]() {
 			auto block = disambiguate();
@@ -525,12 +525,12 @@ std::string YulOptimizerTestCommon::randomOptimiserStep(unsigned _seed)
 
 Block const* YulOptimizerTestCommon::run()
 {
-	return runStep() ? &m_resultObject->code->block() : nullptr;
+	return runStep() ? &m_resultObject->code->root() : nullptr;
 }
 
 Block YulOptimizerTestCommon::disambiguate()
 {
-	auto block = std::get<Block>(Disambiguator(*m_dialect, *m_analysisInfo)(m_object->code->block()));
+	auto block = std::get<Block>(Disambiguator(*m_dialect, *m_analysisInfo)(m_object->code->root()));
 	m_analysisInfo.reset();
 	return block;
 }
