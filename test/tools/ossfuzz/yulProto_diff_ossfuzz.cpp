@@ -102,11 +102,11 @@ DEFINE_PROTO_FUZZER(Program const& _input)
 		EVMDialect::strictAssemblyForEVMObjects(version)
 	);
 	optimizerTest.setStep(optimizerTest.randomOptimiserStep(_input.step()));
-	auto const* astBlock = optimizerTest.run();
-	yulAssert(astBlock != nullptr, "Optimiser error.");
+	auto const* astRoot = optimizerTest.run();
+	yulAssert(astRoot != nullptr, "Optimiser error.");
 	termReason = yulFuzzerUtil::interpret(
 		os2,
-		*astBlock,
+		*astRoot,
 		EVMDialect::strictAssemblyForEVMObjects(version),
 		true
 	);

@@ -58,7 +58,7 @@ public:
 	/// @returns true if it was successful.
 	static bool run(
 		Dialect const& _dialect,
-		Block& _block,
+		Block& _astRoot,
 		Object const& _object,
 		bool _optimizeStackAllocation,
 		size_t _maxIterations

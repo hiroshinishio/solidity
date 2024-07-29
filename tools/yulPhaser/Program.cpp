@@ -198,11 +198,11 @@ std::unique_ptr<AST> Program::applyOptimisationSteps(
 		frontend::OptimiserSettings::standard().expectedExecutionsPerDeployment
 	};
 
-	auto rootBlock = std::get<Block>(ASTCopier{}(_ast->root()));
+	auto astRoot = std::get<Block>(ASTCopier{}(_ast->root()));
 	for (std::string const& step: _optimisationSteps)
-		OptimiserSuite::allSteps().at(step)->run(context, rootBlock);
+		OptimiserSuite::allSteps().at(step)->run(context, astRoot);
 
-	return std::make_unique<AST>(std::move(rootBlock));
+	return std::make_unique<AST>(std::move(astRoot));
 }
 
 size_t Program::computeCodeSize(Block const& _ast, CodeWeights const& _weights)

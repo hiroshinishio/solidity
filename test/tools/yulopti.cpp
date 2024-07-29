@@ -91,20 +91,20 @@ public:
 		try
 		{
 			auto ast = yul::Parser(errorReporter, m_dialect).parse(_charStream);
-			if (!m_block || !errorReporter.errors().empty())
+			if (!m_astRoot || !errorReporter.errors().empty())
 			{
 				std::cerr << "Error parsing source." << std::endl;
 				printErrors(_charStream, errors);
 				throw std::runtime_error("Could not parse source.");
 			}
-			m_block = std::make_shared<yul::Block>(std::get<yul::Block>(ASTCopier{}(ast->root())));
+			m_astRoot = std::make_shared<yul::Block>(std::get<yul::Block>(ASTCopier{}(ast->root())));
 			m_analysisInfo = std::make_unique<yul::AsmAnalysisInfo>();
 			AsmAnalyzer analyzer(
 				*m_analysisInfo,
 				errorReporter,
 				m_dialect
 			);
-			if (!analyzer.analyze(*m_block) || !errorReporter.errors().empty())
+			if (!analyzer.analyze(*m_astRoot) || !errorReporter.errors().empty())
 			{
 				std::cerr << "Error analyzing source." << std::endl;
 				printErrors(_charStream, errors);
@@ -170,17 +170,17 @@ public:
 
 	void disambiguate()
 	{
-		*m_block = std::get<yul::Block>(Disambiguator(m_dialect, *m_analysisInfo)(*m_block));
+		*m_astRoot = std::get<yul::Block>(Disambiguator(m_dialect, *m_analysisInfo)(*m_astRoot));
 		m_analysisInfo.reset();
-		m_nameDispenser.reset(*m_block);
+		m_nameDispenser.reset(*m_astRoot);
 	}
 
 	void runSteps(std::string _source, std::string _steps)
 	{
 		parse(_source);
 		disambiguate();
-		OptimiserSuite{m_context}.runSequence(_steps, *m_block);
-		std::cout << AsmPrinter{AsmPrinter::TypePrinting::OmitDefault, m_dialect}(*m_block) << std::endl;
+		OptimiserSuite{m_context}.runSequence(_steps, *m_astRoot);
+		std::cout << AsmPrinter{AsmPrinter::TypePrinting::OmitDefault, m_dialect}(*m_astRoot) << std::endl;
 	}
 
 	void runInteractive(std::string _source, bool _disambiguated = false)
@@ -211,23 +211,23 @@ public:
 					case '#':
 						return;
 					case ',':
-						VarNameCleaner::run(m_context, *m_block);
+						VarNameCleaner::run(m_context, *m_astRoot);
 						// VarNameCleaner destroys the unique names guarantee of the disambiguator.
 						disambiguated = false;
 						break;
 					case ';':
 					{
 						Object obj;
-						StackCompressor::run(m_dialect, *m_block, obj, true, 16);
+						StackCompressor::run(m_dialect, *m_astRoot, obj, true, 16);
 						break;
 					}
 					default:
 						OptimiserSuite{m_context}.runSequence(
 							std::string_view(&option, 1),
-							*m_block
+							*m_astRoot
 						);
 				}
-				_source = AsmPrinter{AsmPrinter::TypePrinting::OmitDefault, m_dialect}(*m_block);
+				_source = AsmPrinter{AsmPrinter::TypePrinting::OmitDefault, m_dialect}(*m_astRoot);
 			}
 			catch (...)
 			{
@@ -240,7 +240,7 @@ public:
 	}
 
 private:
-	std::shared_ptr<yul::Block> m_block;
+	std::shared_ptr<yul::Block> m_astRoot;
 	Dialect const& m_dialect{EVMDialect::strictAssemblyForEVMObjects(EVMVersion{})};
 	std::unique_ptr<AsmAnalysisInfo> m_analysisInfo;
 	std::set<YulName> const m_reservedIdentifiers = {};

@@ -80,7 +80,7 @@ public:
 	static AsmAnalysisInfo analyzeStrictAssertCorrect(Dialect const& _dialect, Object const& _object);
 	static AsmAnalysisInfo analyzeStrictAssertCorrect(
 		Dialect const& _dialect,
-		Block const& _block,
+		Block const& _astRoot,
 		std::set<std::string> const& _qualifiedDataNames
 	);
 

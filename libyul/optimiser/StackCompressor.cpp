@@ -252,13 +252,13 @@ bool StackCompressor::run(
 
 bool StackCompressor::run(
 	Dialect const& _dialect,
-	Block& _block,
+	Block& _astRoot,
 	Object const& _object,
 	bool _optimizeStackAllocation,
 	size_t _maxIterations)
 {
 	yulAssert(
-		!_block.statements.empty() && std::holds_alternative<Block>(_block.statements.at(0)),
+		!_astRoot.statements.empty() && std::holds_alternative<Block>(_astRoot.statements.at(0)),
 		"Need to run the function grouper before the stack compressor."
 	);
 	bool usesOptimizedCodeGenerator = false;
@@ -267,14 +267,14 @@ bool StackCompressor::run(
 			_optimizeStackAllocation &&
 			evmDialect->evmVersion().canOverchargeGasForCall() &&
 			evmDialect->providesObjectAccess();
-	bool allowMSizeOptimization = !MSizeFinder::containsMSize(_dialect, _block);
+	bool allowMSizeOptimization = !MSizeFinder::containsMSize(_dialect, _astRoot);
 	if (usesOptimizedCodeGenerator)
 	{
-		yul::AsmAnalysisInfo analysisInfo = yul::AsmAnalyzer::analyzeStrictAssertCorrect(_dialect, _block, _object.qualifiedDataNames());
-		std::unique_ptr<CFG> cfg = ControlFlowGraphBuilder::build(analysisInfo, _dialect, _block);
+		yul::AsmAnalysisInfo analysisInfo = yul::AsmAnalyzer::analyzeStrictAssertCorrect(_dialect, _astRoot, _object.qualifiedDataNames());
+		std::unique_ptr<CFG> cfg = ControlFlowGraphBuilder::build(analysisInfo, _dialect, _astRoot);
 		eliminateVariablesOptimizedCodegen(
 			_dialect,
-			_block,
+			_astRoot,
 			StackLayoutGenerator::reportStackTooDeep(*cfg),
 			allowMSizeOptimization
 		);
@@ -282,12 +282,12 @@ bool StackCompressor::run(
 	else
 		for (size_t iterations = 0; iterations < _maxIterations; iterations++)
 		{
-			std::map<YulName, int> stackSurplus = CompilabilityChecker(_dialect, _object, _optimizeStackAllocation, &_block).stackDeficit;
+			std::map<YulName, int> stackSurplus = CompilabilityChecker(_dialect, _object, _optimizeStackAllocation, &_astRoot).stackDeficit;
 			if (stackSurplus.empty())
 				return true;
 			eliminateVariables(
 				_dialect,
-				_block,
+				_astRoot,
 				stackSurplus,
 				allowMSizeOptimization
 			);
