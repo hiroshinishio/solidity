@@ -16,6 +16,7 @@ contract B is A {
     }
  }
 // ====
+// EVMVersion: >=cancun
 // compileViaYul: false
 // ----
 // x() -> 0
