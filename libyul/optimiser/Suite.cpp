@@ -221,6 +221,7 @@ void OptimiserSuite::run(
 #ifdef PROFILE_OPTIMIZER_STEPS
 	outputPerformanceMetrics(suite.m_durationPerStepInMicroseconds);
 #endif
+
 	_object.code = std::make_shared<AST>(std::move(ast));
 	*_object.analysisInfo = AsmAnalyzer::analyzeStrictAssertCorrect(_dialect, _object);
 }

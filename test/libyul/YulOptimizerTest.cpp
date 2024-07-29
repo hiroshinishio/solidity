@@ -78,19 +78,23 @@ TestCase::TestResult YulOptimizerTest::run(std::ostream& _stream, std::string co
 		AnsiColorized(_stream, _formatted, {formatting::BOLD, formatting::RED}) << _linePrefix << "Invalid optimizer step: " << m_optimizerStep << std::endl;
 		return TestResult::FatalError;
 	}
-	auto result = tester.resultObject();
-	auto const printed = (result->subObjects.empty() ? AsmPrinter{AsmPrinter::TypePrinting::OmitDefault, *m_dialect}(result->code->root()) : result->toString(*m_dialect));
+	auto optimizedObject = tester.optimizedObject();
+	std::string printedOptimizedObject;
+	if (optimizedObject->subObjects.empty())
+		printedOptimizedObject = AsmPrinter{AsmPrinter::TypePrinting::OmitDefault, *m_dialect}(optimizedObject->code->root());
+	else
+		printedOptimizedObject = optimizedObject->toString(*m_dialect);
 
 	// Re-parse new code for compilability
-	if (!std::get<0>(parse(_stream, _linePrefix, _formatted, printed)))
+	if (!std::get<0>(parse(_stream, _linePrefix, _formatted, printedOptimizedObject)))
 	{
 		util::AnsiColorized(_stream, _formatted, {util::formatting::BOLD, util::formatting::CYAN})
 			<< _linePrefix << "Result after the optimiser:" << std::endl;
-		printPrefixed(_stream, printed, _linePrefix + "  ");
+		printPrefixed(_stream, printedOptimizedObject, _linePrefix + "  ");
 		return TestResult::FatalError;
 	}
 
-	m_obtainedResult = "step: " + m_optimizerStep + "\n\n" + printed + "\n";
+	m_obtainedResult = "step: " + m_optimizerStep + "\n\n" + printedOptimizedObject + "\n";
 
 	return checkResult(_stream, _linePrefix, _formatted);
 }

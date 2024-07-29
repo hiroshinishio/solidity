@@ -58,7 +58,7 @@ public:
 	/// seeds the random selection.
 	std::string randomOptimiserStep(unsigned _seed);
 	/// the resulting object after performing optimization steps
-	std::shared_ptr<Object> resultObject() const;
+	std::shared_ptr<Object> optimizedObject() const;
 private:
 	Block disambiguate();
 	void updateContext(Block const& _block);
@@ -71,7 +71,7 @@ private:
 	std::unique_ptr<OptimiserStepContext> m_context;
 
 	std::shared_ptr<Object> m_object;
-	std::shared_ptr<Object> m_resultObject;
+	std::shared_ptr<Object> m_optimizedObject;
 	std::shared_ptr<AsmAnalysisInfo> m_analysisInfo;
 	std::map<std::string, std::function<Block(void)>> m_namedSteps;
 };

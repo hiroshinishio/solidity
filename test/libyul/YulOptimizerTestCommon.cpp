@@ -76,9 +76,9 @@ using namespace solidity::frontend;
 YulOptimizerTestCommon::YulOptimizerTestCommon(
 	std::shared_ptr<Object> _obj,
 	Dialect const& _dialect
-): m_dialect(&_dialect), m_object(_obj), m_resultObject(std::make_shared<Object>()), m_analysisInfo(m_object->analysisInfo)
+): m_dialect(&_dialect), m_object(_obj), m_optimizedObject(std::make_shared<Object>()), m_analysisInfo(m_object->analysisInfo)
 {
-	*m_resultObject = *m_object;
+	*m_optimizedObject = *m_object;
 	m_namedSteps = {
 		{"disambiguator", [&]() { return disambiguate(); }},
 		{"nameDisplacer", [&]() {
@@ -409,13 +409,13 @@ YulOptimizerTestCommon::YulOptimizerTestCommon(
 			OptimiserSuite::run(
 				*m_dialect,
 				&meter,
-				*m_resultObject,
+				*m_optimizedObject,
 				true,
 				frontend::OptimiserSettings::DefaultYulOptimiserSteps,
 				frontend::OptimiserSettings::DefaultYulOptimiserCleanupSteps,
 				frontend::OptimiserSettings::standard().expectedExecutionsPerDeployment
 			);
-			return std::get<Block>(ASTCopier{}(m_resultObject->code->root()));
+			return std::get<Block>(ASTCopier{}(m_optimizedObject->code->root()));
 		}},
 		{"stackLimitEvader", [&]() {
 			auto block = disambiguate();
@@ -486,7 +486,7 @@ bool YulOptimizerTestCommon::runStep()
 	if (m_namedSteps.count(m_optimizerStep))
 	{
 		auto block = m_namedSteps[m_optimizerStep]();
-		m_resultObject->code = std::make_shared<AST>(std::move(block));
+		m_optimizedObject->code = std::make_shared<AST>(std::move(block));
 	}
 	else
 		return false;
@@ -525,7 +525,7 @@ std::string YulOptimizerTestCommon::randomOptimiserStep(unsigned _seed)
 
 Block const* YulOptimizerTestCommon::run()
 {
-	return runStep() ? &m_resultObject->code->root() : nullptr;
+	return runStep() ? &m_optimizedObject->code->root() : nullptr;
 }
 
 Block YulOptimizerTestCommon::disambiguate()
@@ -546,7 +546,7 @@ void YulOptimizerTestCommon::updateContext(Block const& _block)
 	});
 }
 
-std::shared_ptr<Object> YulOptimizerTestCommon::resultObject() const
+std::shared_ptr<Object> YulOptimizerTestCommon::optimizedObject() const
 {
-	return m_resultObject;
+	return m_optimizedObject;
 }
