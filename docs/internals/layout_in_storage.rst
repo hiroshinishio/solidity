@@ -6,6 +6,9 @@ Layout of State Variables in Storage
 
 .. _storage-inplace-encoding:
 
+.. note::
+     The rules described in this section apply for both storage and transient storage data locations.
+
 State variables of contracts are stored in storage in a compact way such
 that multiple values sometimes use the same storage slot.
 Except for dynamically-sized arrays and mappings (see below), data is stored
