@@ -88,7 +88,7 @@ void SSAControlFlowGraphBuilder::operator()(ExpressionStatement const& _expressi
 void SSAControlFlowGraphBuilder::operator()(Assignment const& _assignment)
 {
 	assign(
-		_assignment.variableNames | ranges::view::transform([&](auto& _var) { return std::ref(lookupVariable(_var.name)); }) | ranges::to<std::vector>,
+		_assignment.variableNames | ranges::views::transform([&](auto& _var) { return std::ref(lookupVariable(_var.name)); }) | ranges::to<std::vector>,
 		_assignment.value.get()
 	);
 }
@@ -96,7 +96,7 @@ void SSAControlFlowGraphBuilder::operator()(Assignment const& _assignment)
 void SSAControlFlowGraphBuilder::operator()(VariableDeclaration const& _variableDeclaration)
 {
 	assign(
-		_variableDeclaration.variables | ranges::view::transform([&](auto& _var) { return std::ref(lookupVariable(_var.name)); }) | ranges::to<std::vector>,
+		_variableDeclaration.variables | ranges::views::transform([&](auto& _var) { return std::ref(lookupVariable(_var.name)); }) | ranges::to<std::vector>,
 		_variableDeclaration.value.get()
 	);
 }
@@ -250,7 +250,7 @@ void SSAControlFlowGraphBuilder::operator()(Leave const& _leave)
 	auto currentBlockDebugData = debugDataOf(currentBlock());
 	currentBlock().exit = SSACFG::BasicBlock::FunctionReturn{
 		debugDataOf(_leave),
-		m_currentFunction->returns | ranges::view::transform([&](auto _var) {
+		m_currentFunction->returns | ranges::views::transform([&](auto _var) {
 			return readVariable(_var, m_currentBlock);
 		}) | ranges::to<std::vector>
 	};
@@ -483,7 +483,7 @@ SSACFG::ValueId SSAControlFlowGraphBuilder::tryRemoveTrivialPhi(SSACFG::ValueId 
 			for (auto& output: op.outputs)
 				yulAssert(output != _phi);
 
-			for (auto&& [n, input]: op.inputs | ranges::view::enumerate)
+			for (auto&& [n, input]: op.inputs | ranges::views::enumerate)
 				if (input == _phi)
 					uses.emplace_back(Use{std::ref(op), n});
 		}
@@ -598,7 +598,7 @@ void SSAControlFlowGraphBuilder::tableJump(
 	SSACFG::BlockId _defaultCase
 )
 {
-	for (auto caseBlock: _cases | ranges::view::values)
+	for (auto caseBlock: _cases | ranges::views::values)
 	{
 		yulAssert(!blockInfo(caseBlock).sealed);
 		m_graph.block(caseBlock).entries.insert(m_currentBlock);
