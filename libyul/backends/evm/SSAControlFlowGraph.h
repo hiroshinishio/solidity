@@ -200,7 +200,7 @@ public:
 		return it->second;
 	}
 private:
-	std::vector<ValueInfo> m_valueInfos;
+	std::deque<ValueInfo> m_valueInfos;
 	std::map<u256, ValueId> m_literals;
 	std::optional<ValueId> m_unreachableValue;
 public:

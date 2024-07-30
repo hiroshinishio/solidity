@@ -385,8 +385,7 @@ SSACFG::ValueId SSAControlFlowGraphBuilder::readVariable(Scope::Variable const& 
 	return readVariableRecursive(_variable, _block);
 }
 
-SSACFG::ValueId
-SSAControlFlowGraphBuilder::readVariableRecursive(Scope::Variable const& _variable, SSACFG::BlockId _block)
+SSACFG::ValueId SSAControlFlowGraphBuilder::readVariableRecursive(Scope::Variable const& _variable, SSACFG::BlockId _block)
 {
 	auto& block = m_graph.block(_block);
 	auto& info = blockInfo(_block);
@@ -409,8 +408,7 @@ SSAControlFlowGraphBuilder::readVariableRecursive(Scope::Variable const& _variab
 	return phi;
 }
 
-SSACFG::ValueId
-SSAControlFlowGraphBuilder::addPhiOperands(Scope::Variable const& _variable, SSACFG::ValueId _phi)
+SSACFG::ValueId SSAControlFlowGraphBuilder::addPhiOperands(Scope::Variable const& _variable, SSACFG::ValueId _phi)
 {
 	auto* phi = std::get_if<SSACFG::PhiValue>(&m_graph.valueInfo(_phi));
 	yulAssert(phi);
