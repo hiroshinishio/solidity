@@ -62,6 +62,8 @@ add_library(yul
 	backends/evm/NoOutputAssembly.cpp
 	backends/evm/OptimizedEVMCodeTransform.cpp
 	backends/evm/OptimizedEVMCodeTransform.h
+	backends/evm/SSAEVMCodeTransform.cpp
+	backends/evm/SSAEVMCodeTransform.h
 	backends/evm/SSAControlFlowGraph.h
 	backends/evm/SSAControlFlowGraphBuilder.cpp
 	backends/evm/SSAControlFlowGraphBuilder.h
