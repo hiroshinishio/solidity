@@ -103,7 +103,6 @@ public:
 			ValueId value;
 			std::map<u256, BlockId> cases;
 			BlockId defaultCase;
-
 		};
 		struct FunctionReturn
 		{
